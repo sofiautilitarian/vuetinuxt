@@ -5,6 +5,8 @@ import nodeCrypto from 'node:crypto';
 import { parentPort, threadId } from 'node:worker_threads';
 import { defineEventHandler, handleCacheHeaders, splitCookiesString, createEvent, fetchWithEvent, isEvent, eventHandler, setHeaders, sendRedirect, proxyRequest, getRequestHeader, setResponseHeaders, setResponseStatus, send, getRequestHeaders, setResponseHeader, appendResponseHeader, getRequestURL, getResponseHeader, removeResponseHeader, createError, getQuery as getQuery$1, readBody, createApp, createRouter as createRouter$1, toNodeListener, lazyEventHandler, getResponseStatus, getRouterParam, getResponseStatusText } from 'file://C:/Users/shirushi-Sofia/office/vuetinuxt/node_modules/h3/dist/index.mjs';
 import { escapeHtml } from 'file://C:/Users/shirushi-Sofia/office/vuetinuxt/node_modules/@vue/shared/dist/shared.cjs.js';
+import bcrypt from 'file://C:/Users/shirushi-Sofia/office/vuetinuxt/node_modules/bcryptjs/index.js';
+import { PrismaClient } from 'file://C:/Users/shirushi-Sofia/office/vuetinuxt/node_modules/@prisma/client/default.js';
 import { createRenderer, getRequestDependencies, getPreloadLinks, getPrefetchLinks } from 'file://C:/Users/shirushi-Sofia/office/vuetinuxt/node_modules/vue-bundle-renderer/dist/runtime.mjs';
 import { parseURL, withoutBase, joinURL, getQuery, withQuery, withTrailingSlash, decodePath, withLeadingSlash, withoutTrailingSlash, joinRelativeURL } from 'file://C:/Users/shirushi-Sofia/office/vuetinuxt/node_modules/ufo/dist/index.mjs';
 import destr, { destr as destr$1 } from 'file://C:/Users/shirushi-Sofia/office/vuetinuxt/node_modules/destr/dist/index.mjs';
@@ -1521,10 +1523,14 @@ async function getIslandContext(event) {
   return ctx;
 }
 
+const _lazy_LUD3C5 = () => Promise.resolve().then(function () { return login$1; });
+const _lazy_rPUCyH = () => Promise.resolve().then(function () { return register$1; });
 const _lazy_Qxu2DV = () => Promise.resolve().then(function () { return renderer$1; });
 
 const handlers = [
   { route: '', handler: _e0mAN9, lazy: false, middleware: true, method: undefined },
+  { route: '/api/login', handler: _lazy_LUD3C5, lazy: true, middleware: false, method: undefined },
+  { route: '/api/register', handler: _lazy_rPUCyH, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_error', handler: _lazy_Qxu2DV, lazy: true, middleware: false, method: undefined },
   { route: '/__nuxt_island/**', handler: _SxA8c9, lazy: false, middleware: false, method: undefined },
   { route: '/**', handler: _lazy_Qxu2DV, lazy: true, middleware: false, method: undefined }
@@ -1853,6 +1859,83 @@ const styles = {};
 const styles$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
   __proto__: null,
   default: styles
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const prisma = new PrismaClient();
+
+const login = defineEventHandler(async (event) => {
+  const body = await readBody(event);
+  const { email, password } = body;
+  if (!email || !password) {
+    return {
+      success: false,
+      message: "Email and password are required."
+    };
+  }
+  const user = await prisma.user.findUnique({
+    where: { email }
+  });
+  if (!user) {
+    return {
+      success: false,
+      message: "Invalid email or password."
+    };
+  }
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    return {
+      success: false,
+      message: "Invalid email or password."
+    };
+  }
+  return {
+    success: true,
+    message: "Login successful!",
+    id: user.id
+  };
+});
+
+const login$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: login
+}, Symbol.toStringTag, { value: 'Module' }));
+
+const register = defineEventHandler(async (event) => {
+  const body = await readBody(event);
+  const { email, password } = body;
+  if (!email || !password) {
+    return {
+      success: false,
+      message: "Email and password are required."
+    };
+  }
+  const existingUser = await prisma.user.findUnique({
+    where: { email }
+  });
+  if (existingUser) {
+    return {
+      success: false,
+      message: "This email is already registered."
+    };
+  }
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const user = await prisma.user.create({
+    data: {
+      email,
+      password: hashedPassword
+    }
+  });
+  return {
+    success: true,
+    message: "Registration successful!",
+    id: user.id
+    // Returning the user ID after successful registration
+  };
+});
+
+const register$1 = /*#__PURE__*/Object.freeze(/*#__PURE__*/Object.defineProperty({
+  __proto__: null,
+  default: register
 }, Symbol.toStringTag, { value: 'Module' }));
 
 function renderPayloadResponse(ssrContext) {

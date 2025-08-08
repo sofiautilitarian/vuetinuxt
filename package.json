@@ -1,8 +1,14 @@
 {
   "dependencies": {
+    "@prisma/client": "^6.13.0",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
     "nuxt": "^4.0.3",
+    "pg": "^8.16.3",
+    "psql": "^0.0.1",
     "sass": "^1.90.0",
     "sass-loader": "^10.5.2",
+    "uuid": "^11.1.0",
     "vuetify": "^3.9.0-beta.1"
   },
   "scripts": {
@@ -11,6 +17,9 @@
     "start": "nuxt start"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/uuid": "^10.0.0",
+    "prisma": "^6.13.0",
     "vite-plugin-vuetify": "^2.1.2"
   }
 }
